@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Présidents Américains</title>
+<style>
+  :root {
+    --ink:      #0a0e1a;
+    --surface:  #111827;
+    --card:     #1a2035;
+    --border:   #2a3a55;
+    --gold:     #c8a84b;
+    --gold2:    #e8c86a;
+    --red:      #b22234;
+    --blue:     #3c3b6e;
+    --text:     #e8dfc8;
+    --text2:    #8a9ab5;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%; overflow: hidden;
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--ink); color: var(--text);
+  }
+
+  #app {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; flex-direction: column;
+    padding-top: var(--safe-top);
+    background: var(--ink);
+  }
+
+  /* ── HEADER ── */
+  #header {
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #0d1528 0%, #111827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px 8px;
+  }
+  .header-top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #header h1 {
+    font-size: 18px; font-weight: 700;
+    color: var(--gold2); letter-spacing: 0.3px;
+    flex: 1; text-align: center;
+  }
+  #lang-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--gold); font-size: 12px; font-weight: 600;
+    border-radius: 8px; padding: 4px 10px;
+    cursor: pointer; min-width: 36px; text-align: center;
+  }
+  #settings-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 20px; color: var(--text2); padding: 0 2px;
+    min-width: 32px; text-align: right;
+  }
+
+  /* Subtitle */
+  #subtitle {
+    text-align: center; font-size: 11px; color: var(--text2);
+    margin-top: 3px; letter-spacing: 0.5px;
+  }
+
+  /* ── SEARCH ── */
+  #search-wrap {
+    flex-shrink: 0;
+    padding: 8px 12px 4px;
+    background: var(--ink);
+  }
+  #search {
+    width: 100%; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-size: 14px;
+    padding: 7px 12px; outline: none;
+    -webkit-appearance: none;
+  }
+  #search::placeholder { color: var(--text2); }
+
+  /* ── FILTERS ── */
+  #filters {
+    flex-shrink: 0;
+    display: flex; gap: 6px;
+    padding: 6px 12px;
+    overflow-x: auto; background: var(--ink);
+    scrollbar-width: none;
+  }
+  #filters::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    white-space: nowrap; font-size: 11px; font-weight: 600;
+    border-radius: 16px; padding: 4px 12px; cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface); color: var(--text2);
+    transition: all 0.15s;
+  }
+  .filter-btn.active {
+    background: var(--gold); color: #000;
+    border-color: var(--gold);
+  }
+
+  /* ── COUNT ── */
+  #count {
+    flex-shrink: 0;
+    text-align: center; font-size: 11px; color: var(--text2);
+    padding: 2px 0 4px;
+  }
+
+  /* ── LIST ── */
+  #scroll {
+    flex: 1; overflow-y: auto;
+    padding: 0 10px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .president-card {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 12px; margin-bottom: 8px;
+    cursor: pointer; transition: background 0.1s;
+  }
+  .president-card:active { background: #222e45; }
+
+  .card-num {
+    font-size: 11px; color: var(--gold); font-weight: 700;
+    min-width: 26px; text-align: center;
+    line-height: 1;
+  }
+
+  .card-portrait {
+    width: 48px; height: 48px; border-radius: 50%;
+    object-fit: cover; border: 2px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .card-portrait-placeholder {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+
+  .card-info { flex: 1; min-width: 0; }
+  .card-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-dates { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .card-party { font-size: 10px; margin-top: 3px; font-weight: 500; }
+  .party-rep { color: #ff6b6b; }
+  .party-dem { color: #6b9fff; }
+  .party-other { color: #aaa; }
+
+  .card-arrow { color: var(--text2); font-size: 14px; }
+
+  /* ── SAFE BOTTOM ── */
+  #safe-bottom { flex-shrink: 0; height: var(--safe-bot); background: var(--ink); }
+
+  /* ════════════════════════════════════
+     MODAL DÉTAIL
+  ════════════════════════════════════ */
+  #modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 200;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding-top: var(--safe-top);
+  }
+  #modal-overlay.open { display: block; }
+
+  #modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    min-height: 85vh;
+    margin-top: 60px;
+    padding: 0 0 40px;
+    position: relative;
+  }
+
+  #modal-close {
+    position: absolute; top: 12px; right: 16px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-size: 18px; border-radius: 50%;
+    width: 32px; height: 32px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+  }
+
+  /* Hero */
+  #modal-hero {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 20px 16px;
+    background: linear-gradient(180deg, #0d1528 0%, var(--surface) 100%);
+    border-radius: 20px 20px 0 0;
+  }
+  #modal-portrait {
+    width: 100px; height: 100px; border-radius: 50%;
+    object-fit: cover; border: 3px solid var(--gold);
+    background: var(--card);
+    margin-bottom: 12px;
+  }
+  #modal-portrait-placeholder {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: var(--card); border: 3px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px; margin-bottom: 12px;
+  }
+  #modal-num { font-size: 12px; color: var(--gold); font-weight: 700; margin-bottom: 4px; }
+  #modal-name { font-size: 20px; font-weight: 700; color: var(--gold2); text-align: center; }
+  #modal-name-sub { font-size: 13px; color: var(--text2); margin-top: 2px; text-align: center; }
+  #modal-dates { font-size: 13px; color: var(--text2); margin-top: 6px; }
+  #modal-party-badge {
+    margin-top: 8px; font-size: 11px; font-weight: 600;
+    border-radius: 12px; padding: 3px 12px;
+    border: 1px solid;
+  }
+  .badge-rep { color: #ff6b6b; border-color: #ff6b6b; background: rgba(255,107,107,0.1); }
+  .badge-dem { color: #6b9fff; border-color: #6b9fff; background: rgba(107,159,255,0.1); }
+  .badge-other { color: #aaa; border-color: #aaa; background: rgba(170,170,170,0.1); }
+
+  /* Sections */
+  .modal-section {
+    margin: 16px 16px 0;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px;
+  }
+  .section-title {
+    font-size: 11px; font-weight: 700; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+  .section-text {
+    font-size: 13px; color: var(--text); line-height: 1.6;
+  }
+
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .info-item { }
+  .info-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-value { font-size: 13px; color: var(--text); font-weight: 500; margin-top: 2px; }
+
+  .events-list { list-style: none; }
+  .events-list li {
+    font-size: 12px; color: var(--text);
+    padding: 4px 0; border-bottom: 1px solid var(--border);
+    line-height: 1.5;
+  }
+  .events-list li:last-child { border-bottom: none; }
+  .events-list li::before { content: "▸ "; color: var(--gold); }
+
+  /* ════════════════════════════════════
+     MODAL SETTINGS
+  ════════════════════════════════════ */
+  #settings-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 300;
+    padding-top: var(--safe-top);
+  }
+  #settings-overlay.open { display: flex; align-items: flex-end; }
+
+  #settings-panel {
+    background: var(--surface); border-radius: 20px 20px 0 0;
+    width: 100%; padding: 16px 20px 30px;
+    border-top: 1px solid var(--border);
+  }
+  .settings-handle {
+    width: 36px; height: 4px; background: var(--border);
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  #settings-panel h2 {
+    font-size: 15px; color: var(--gold2); margin-bottom: 16px; text-align: center;
+  }
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label { font-size: 14px; color: var(--text); }
+  .settings-value { font-size: 13px; color: var(--gold); font-weight: 600; }
+
+  .settings-apps {
+    margin-top: 16px;
+  }
+  .settings-apps h3 { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .app-link-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; border-radius: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    margin-bottom: 6px; cursor: pointer; text-decoration: none;
+  }
+  .app-link-icon { font-size: 22px; }
+  .app-link-info { flex: 1; }
+  .app-link-name { font-size: 13px; color: var(--text); font-weight: 500; }
+  .app-link-desc { font-size: 11px; color: var(--text2); }
+  .app-link-arrow { color: var(--text2); font-size: 13px; }
+
+  /* ── QUIZ ── */
+  #quiz-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); z-index: 400;
+    padding: var(--safe-top) 0 0;
+    flex-direction: column;
+  }
+  #quiz-overlay.open { display: flex; }
+
+  #quiz-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+  }
+  #quiz-header h2 { font-size: 16px; color: var(--gold2); }
+  #quiz-close {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-size: 16px; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #quiz-score-bar {
+    padding: 6px 16px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #quiz-score-txt { font-size: 12px; color: var(--gold); font-weight: 600; }
+  #quiz-progress-txt { font-size: 12px; color: var(--text2); }
+
+  #quiz-body { flex: 1; overflow-y: auto; padding: 20px 16px; }
+  #quiz-portrait-wrap { text-align: center; margin-bottom: 16px; }
+  #quiz-portrait {
+    width: 90px; height: 90px; border-radius: 50%;
+    object-fit: cover; border: 3px solid var(--gold);
+    background: var(--card);
+  }
+  #quiz-portrait-ph {
+    display: inline-flex; width: 90px; height: 90px; border-radius: 50%;
+    background: var(--card); border: 3px solid var(--gold);
+    align-items: center; justify-content: center; font-size: 38px;
+  }
+  #quiz-question { font-size: 15px; color: var(--text); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+  .quiz-option {
+    display: block; width: 100%;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 13px 16px; margin-bottom: 10px;
+    color: var(--text); font-size: 14px; cursor: pointer;
+    text-align: left; transition: background 0.1s;
+  }
+  .quiz-option:active { background: #222e45; }
+  .quiz-option.correct { background: rgba(80,200,100,0.2); border-color: #50c864; color: #50c864; }
+  .quiz-option.wrong   { background: rgba(220,80,80,0.2);  border-color: #dc5050; color: #dc5050; }
+
+  #quiz-next {
+    display: none; width: 100%;
+    background: var(--gold); color: #000; font-weight: 700;
+    border: none; border-radius: 12px; padding: 14px;
+    font-size: 15px; cursor: pointer; margin-top: 10px;
+  }
+
+  #quiz-end {
+    display: none; text-align: center; padding: 30px 0;
+  }
+  #quiz-end-score { font-size: 48px; color: var(--gold2); font-weight: 700; }
+  #quiz-end-label { font-size: 16px; color: var(--text2); margin-top: 6px; }
+  #quiz-restart {
+    margin-top: 24px;
+    background: var(--gold); color: #000; font-weight: 700;
+    border: none; border-radius: 12px; padding: 14px 40px;
+    font-size: 15px; cursor: pointer;
+  }
+
+  /* ── PANEL APPS ── */
+  #panel-apps {
+    display: none; flex: 1; overflow-y: auto;
+    padding: 10px 10px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  #panel-apps.active { display: flex; flex-direction: column; }
+
+  .apps-header-lbl {
+    font-size: 11px; font-weight: 700; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.7px;
+    padding: 4px 4px 8px;
+  }
+
+  .app-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 8px;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.1s;
+  }
+  .app-row:active { background: #222e45; }
+  .app-row-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .app-row-info { flex: 1; min-width: 0; }
+  .app-row-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .app-row-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .app-row-arrow { font-size: 16px; color: var(--text2); }
+
+  /* ── TAB BAR ── */
+  #tabbar {
+    flex-shrink: 0;
+    display: flex; background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px 0 calc(8px + var(--safe-bot));
+    border: none; background: none; cursor: pointer;
+    color: var(--text2); font-size: 10px; gap: 3px;
+    transition: color 0.15s;
+  }
+  .tab-btn .tab-icon { font-size: 20px; }
+  .tab-btn.active { color: var(--gold); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="header-top">
+      <button id="lang-btn" onclick="toggleLang()">EN</button>
+      <h1 id="main-title">Présidents Américains</h1>
+      <button id="settings-btn" onclick="openSettings()">⚙️</button>
+    </div>
+    <div id="subtitle">47 présidents · 1789 – 2025</div>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="search-wrap">
+    <input id="search" type="search" placeholder="Rechercher…" oninput="applyFilters()">
+  </div>
+
+  <!-- FILTERS -->
+  <div id="filters">
+    <button class="filter-btn active" onclick="setFilter('all',this)" data-fr="Tous" data-en="All">Tous</button>
+    <button class="filter-btn" onclick="setFilter('Republican',this)" data-fr="Républicain" data-en="Republican">Républicain</button>
+    <button class="filter-btn" onclick="setFilter('Democratic',this)" data-fr="Démocrate" data-en="Democratic">Démocrate</button>
+    <button class="filter-btn" onclick="setFilter('Other',this)" data-fr="Autre" data-en="Autre / Other">Autre</button>
+    <button class="filter-btn" onclick="setFilter('18',this)" data-fr="XVIIIe s." data-en="18th c.">XVIIIe s.</button>
+    <button class="filter-btn" onclick="setFilter('19',this)" data-fr="XIXe s." data-en="19th c.">XIXe s.</button>
+    <button class="filter-btn" onclick="setFilter('20',this)" data-fr="XXe s." data-en="20th c.">XXe s.</button>
+    <button class="filter-btn" onclick="setFilter('21',this)" data-fr="XXIe s." data-en="21st c.">XXIe s.</button>
+  </div>
+
+  <!-- COUNT -->
+  <div id="count"></div>
+
+  <!-- LIST -->
+  <div id="scroll"></div>
+
+  <!-- PANEL APPS -->
+  <div id="panel-apps"></div>
+
+  <!-- TABBAR -->
+  <div id="tabbar">
+    <button class="tab-btn active" id="tab-list" onclick="switchTab('list')">
+      <span class="tab-icon">🏛️</span>
+      <span id="tab-list-lbl">Liste</span>
+    </button>
+    <button class="tab-btn" id="tab-quiz" onclick="switchTab('quiz')">
+      <span class="tab-icon">🎯</span>
+      <span id="tab-quiz-lbl">Quiz</span>
+    </button>
+    <button class="tab-btn" id="tab-apps" onclick="switchTab('apps')">
+      <span class="tab-icon">📱</span>
+      <span id="tab-apps-lbl">Mes Apps</span>
+    </button>
+  </div>
+
+  <div id="safe-bottom"></div>
+</div>
+
+<!-- ═══════════════ MODAL DÉTAIL ═══════════════ -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal">
+    <button id="modal-close" onclick="closeModalBtn()">✕</button>
+
+    <div id="modal-hero">
+      <div id="modal-portrait-placeholder" class="modal-portrait-ph">🇺🇸</div>
+      <img id="modal-portrait" style="display:none" alt="">
+      <div id="modal-num"></div>
+      <div id="modal-name"></div>
+      <div id="modal-name-sub"></div>
+      <div id="modal-dates"></div>
+      <div id="modal-party-badge"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="section-title" id="lbl-infos">Informations</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label" id="lbl-born">Naissance</div>
+          <div class="info-value" id="modal-born"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label" id="lbl-died">Décès</div>
+          <div class="info-value" id="modal-died"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label" id="lbl-vp">Vice-Président</div>
+          <div class="info-value" id="modal-vp"></div>
+        </div>
+        <div class="info-item">
+          <div class="info-label" id="lbl-mandate">Mandat</div>
+          <div class="info-value" id="modal-mandate"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="section-title" id="lbl-bio">Biographie</div>
+      <div class="section-text" id="modal-bio"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="section-title" id="lbl-events">Événements clés</div>
+      <ul class="events-list" id="modal-events"></ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ SETTINGS ═══════════════ -->
+<div id="settings-overlay" onclick="closeSettings(event)">
+  <div id="settings-panel">
+    <div class="settings-handle"></div>
+    <h2 id="settings-title">⚙️ Réglages</h2>
+    <div class="settings-row">
+      <span class="settings-label" id="lbl-lang">Langue</span>
+      <span class="settings-value" id="settings-lang-val">Français</span>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label" id="lbl-total">Total présidents</span>
+      <span class="settings-value">47</span>
+    </div>
+    <div class="settings-apps">
+      <h3 id="lbl-also">Autres applications</h3>
+      <a class="app-link-row" onclick="openUrl('https://apps.apple.com/app/id6761323546')">
+        <span class="app-link-icon">👑</span>
+        <div class="app-link-info">
+          <div class="app-link-name">Rois de France</div>
+          <div class="app-link-desc">44 souverains par dynastie</div>
+        </div>
+        <span class="app-link-arrow">›</span>
+      </a>
+      <a class="app-link-row" onclick="openUrl('https://apps.apple.com/app/id6761424444')">
+        <span class="app-link-icon">🇫🇷</span>
+        <div class="app-link-info">
+          <div class="app-link-name">Présidents Français</div>
+          <div class="app-link-desc">Les présidents de la République</div>
+        </div>
+        <span class="app-link-arrow">›</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ QUIZ OVERLAY ═══════════════ -->
+<div id="quiz-overlay">
+  <div id="quiz-header">
+    <h2 id="quiz-title">🎯 Quiz</h2>
+    <button id="quiz-close" onclick="closeQuiz()">✕</button>
+  </div>
+  <div id="quiz-score-bar">
+    <span id="quiz-score-txt">Score : 0</span>
+    <span id="quiz-progress-txt">Question 1/10</span>
+  </div>
+  <div id="quiz-body">
+    <div id="quiz-portrait-wrap"></div>
+    <div id="quiz-question"></div>
+    <div id="quiz-options"></div>
+    <button id="quiz-next" onclick="nextQuestion()"></button>
+    <div id="quiz-end">
+      <div id="quiz-end-score"></div>
+      <div id="quiz-end-label"></div>
+      <button id="quiz-restart" onclick="startQuiz()"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  DONNÉES
+// ═══════════════════════════════════════
+const PRESIDENTS = [
+  {
+    num:1, name:"George Washington", nameEn:"George Washington",
+    party:"Other", partyFr:"Sans parti", partyEn:"No party",
+    mandate:"1789–1797", born:"1732, Virginie", died:"1799",
+    vp:"John Adams",
+    wiki:"George_Washington",
+    bioFr:"Premier président des États-Unis, Washington est souvent surnommé le « Père de la Nation ». Général en chef lors de la guerre d'Indépendance, il présida la Convention constitutionnelle de 1787. Refusant l'idée d'une monarchie, il établit la tradition du mandat présidentiel limité.",
+    bioEn:"First president of the United States, Washington is often called the 'Father of the Nation'. Commander-in-chief during the Revolutionary War, he presided over the Constitutional Convention of 1787 and established the tradition of limiting presidential terms.",
+    eventsFr:["1775–1783 : Commandant la Révolution américaine","1787 : Préside la Convention constitutionnelle","1789 : Élu premier président","1796 : Discours d'adieu célèbre, déconseillant les factions"],
+    eventsEn:["1775–1783: Commands the American Revolution","1787: Presides over Constitutional Convention","1789: Elected first president","1796: Famous Farewell Address warning against factions"]
+  },
+  {
+    num:2, name:"John Adams", nameEn:"John Adams",
+    party:"Other", partyFr:"Fédéraliste", partyEn:"Federalist",
+    mandate:"1797–1801", born:"1735, Massachusetts", died:"1826",
+    vp:"Thomas Jefferson",
+    wiki:"John_Adams_(homme_d'État)",
+    bioFr:"Juriste et diplomate, Adams fut l'un des Pères fondateurs. Vice-président sous Washington, il fut le premier à habiter la Maison-Blanche. Son mandat fut marqué par des tensions avec la France et les lois sur les étrangers et la sédition.",
+    bioEn:"Lawyer and diplomat, Adams was one of the Founding Fathers. Vice president under Washington, he was the first to live in the White House. His term was marked by tensions with France and the Alien and Sedition Acts.",
+    eventsFr:["1798 : Quasi-guerre avec la France","1798 : Lois sur les étrangers et la sédition","1800 : Premier à s'installer à la Maison-Blanche"],
+    eventsEn:["1798: Quasi-War with France","1798: Alien and Sedition Acts","1800: First president to live in the White House"]
+  },
+  {
+    num:3, name:"Thomas Jefferson", nameEn:"Thomas Jefferson",
+    party:"Other", partyFr:"Républicain-Démocrate", partyEn:"Democratic-Republican",
+    mandate:"1801–1809", born:"1743, Virginie", died:"1826",
+    vp:"Aaron Burr, George Clinton",
+    wiki:"Thomas_Jefferson",
+    bioFr:"Auteur principal de la Déclaration d'Indépendance, Jefferson doubla la superficie des États-Unis avec l'achat de la Louisiane. Philosophe des Lumières, il fonda l'Université de Virginie.",
+    bioEn:"Principal author of the Declaration of Independence, Jefferson doubled the size of the United States with the Louisiana Purchase. An Enlightenment philosopher, he founded the University of Virginia.",
+    eventsFr:["1803 : Achat de la Louisiane (2 millions de km²)","1804–1806 : Expédition Lewis et Clark","1807 : Embargo Act contre la Grande-Bretagne"],
+    eventsEn:["1803: Louisiana Purchase (doubling US territory)","1804–1806: Lewis and Clark Expedition","1807: Embargo Act against Britain"]
+  },
+  {
+    num:4, name:"James Madison", nameEn:"James Madison",
+    party:"Other", partyFr:"Républicain-Démocrate", partyEn:"Democratic-Republican",
+    mandate:"1809–1817", born:"1751, Virginie", died:"1836",
+    vp:"George Clinton, Elbridge Gerry",
+    wiki:"James_Madison",
+    bioFr:"Surnommé le « Père de la Constitution », Madison rédigea la Charte des droits. Il mena le pays durant la guerre de 1812 contre la Grande-Bretagne, au cours de laquelle Washington fut brûlée.",
+    bioEn:"Known as the 'Father of the Constitution', Madison drafted the Bill of Rights. He led the country during the War of 1812 against Britain, during which Washington D.C. was burned.",
+    eventsFr:["1812–1815 : Guerre de 1812 contre la Grande-Bretagne","1814 : Incendie de Washington par les Britanniques","1815 : Bataille de La Nouvelle-Orléans (Andrew Jackson)"],
+    eventsEn:["1812–1815: War of 1812 against Britain","1814: British burn Washington D.C.","1815: Battle of New Orleans (Andrew Jackson)"]
+  },
+  {
+    num:5, name:"James Monroe", nameEn:"James Monroe",
+    party:"Other", partyFr:"Républicain-Démocrate", partyEn:"Democratic-Republican",
+    mandate:"1817–1825", born:"1758, Virginie", died:"1831",
+    vp:"Daniel D. Tompkins",
+    wiki:"James_Monroe",
+    bioFr:"Dernier président « Père fondateur », Monroe proclama la doctrine Monroe en 1823 : l'Amérique aux Américains, sans ingérence européenne. Son mandat fut surnommé « l'ère des bons sentiments ».",
+    bioEn:"The last Founding Father president, Monroe proclaimed the Monroe Doctrine in 1823: America for Americans, warning against European interference. His term was called the 'Era of Good Feelings'.",
+    eventsFr:["1818 : Délimitation de la frontière canadienne","1820 : Compromis du Missouri (esclavage)","1823 : Doctrine Monroe"],
+    eventsEn:["1818: Canadian border established","1820: Missouri Compromise (slavery)","1823: Monroe Doctrine proclaimed"]
+  },
+  {
+    num:6, name:"John Quincy Adams", nameEn:"John Quincy Adams",
+    party:"Other", partyFr:"Républicain-Démocrate / Whig", partyEn:"Democratic-Republican / Whig",
+    mandate:"1825–1829", born:"1767, Massachusetts", died:"1848",
+    vp:"John C. Calhoun",
+    wiki:"John_Quincy_Adams",
+    bioFr:"Fils du président John Adams, il fut diplomate avant d'être élu président par la Chambre des représentants. Après sa présidence, il siégea au Congrès et combattit l'esclavage.",
+    bioEn:"Son of President John Adams, he was a diplomat before being elected president by the House. After his presidency, he served in Congress and fought against slavery.",
+    eventsFr:["1825 : Élu par la Chambre (pas de majorité électorale)","1828 : Tarif Abomination provoque des tensions","1831–1848 : Siège à la Chambre après sa présidence"],
+    eventsEn:["1825: Elected by the House (no electoral majority)","1828: Tariff of Abominations causes tensions","1831–1848: Serves in Congress after presidency"]
+  },
+  {
+    num:7, name:"Andrew Jackson", nameEn:"Andrew Jackson",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1829–1837", born:"1767, Caroline du Sud", died:"1845",
+    vp:"John C. Calhoun, Martin Van Buren",
+    wiki:"Andrew_Jackson",
+    bioFr:"Héros de la guerre de 1812, Jackson fut le premier président « populiste », représentant l'homme ordinaire. Controversé pour la déportation des Amérindiens (Piste des Larmes), il est aussi le fondateur du Parti démocrate moderne.",
+    bioEn:"Hero of the War of 1812, Jackson was the first 'populist' president, representing the common man. Controversial for the forced removal of Native Americans (Trail of Tears), he is also the founder of the modern Democratic Party.",
+    eventsFr:["1830 : Indian Removal Act → Piste des Larmes","1832 : Veto contre la Banque nationale","1835 : Dernier président sans dette nationale"],
+    eventsEn:["1830: Indian Removal Act → Trail of Tears","1832: Veto of the National Bank","1835: Last president to pay off national debt"]
+  },
+  {
+    num:8, name:"Martin Van Buren", nameEn:"Martin Van Buren",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1837–1841", born:"1782, New York", died:"1862",
+    vp:"Richard Mentor Johnson",
+    wiki:"Martin_Van_Buren",
+    bioFr:"Premier président né citoyen américain (après l'indépendance), Van Buren hérita de la Panique de 1837, grave crise économique. Il fut battu par Harrison qui lui reprochait les difficultés économiques.",
+    bioEn:"First president born a U.S. citizen (after independence), Van Buren inherited the Panic of 1837, a severe economic crisis. He lost reelection to Harrison, who blamed him for economic hardship.",
+    eventsFr:["1837 : Panique de 1837 (grave dépression économique)","1839 : Affaire de l'Amistad","1840 : Battu par William Harrison"],
+    eventsEn:["1837: Panic of 1837 (severe economic depression)","1839: Amistad affair","1840: Defeated by William Harrison"]
+  },
+  {
+    num:9, name:"William Henry Harrison", nameEn:"William Henry Harrison",
+    party:"Other", partyFr:"Whig", partyEn:"Whig",
+    mandate:"1841", born:"1773, Virginie", died:"1841",
+    vp:"John Tyler",
+    wiki:"William_Henry_Harrison",
+    bioFr:"Harrison détient le record du discours inaugural le plus long (2 heures sous la pluie) et du mandat le plus court : il mourut de pneumonie 31 jours après son investiture.",
+    bioEn:"Harrison holds the record for the longest inaugural address (2 hours in the rain) and shortest term: he died of pneumonia just 31 days after his inauguration.",
+    eventsFr:["4 mars 1841 : Investiture avec discours de 2h sous la pluie","4 avril 1841 : Décès de pneumonie (31 jours de mandat)"],
+    eventsEn:["March 4, 1841: Inauguration with 2-hour speech in the rain","April 4, 1841: Dies of pneumonia (31-day term)"]
+  },
+  {
+    num:10, name:"John Tyler", nameEn:"John Tyler",
+    party:"Other", partyFr:"Whig (exclu) / Sans parti", partyEn:"Whig (expelled) / Independent",
+    mandate:"1841–1845", born:"1790, Virginie", died:"1862",
+    vp:"Aucun / None",
+    wiki:"John_Tyler",
+    bioFr:"Vice-président de Harrison, Tyler devint président après son décès. Exclu du Parti whig, il gouverna sans soutien partisan. Il annexa le Texas à la fin de son mandat.",
+    bioEn:"Harrison's vice president, Tyler became president after his death. Expelled from the Whig Party, he governed without partisan support. He annexed Texas at the end of his term.",
+    eventsFr:["1841 : Succède à Harrison (premier VP à accéder à la présidence)","1844 : Exclu du Parti whig","1845 : Annexion du Texas"],
+    eventsEn:["1841: Succeeds Harrison (first VP to become president)","1844: Expelled from Whig Party","1845: Annexation of Texas"]
+  },
+  {
+    num:11, name:"James K. Polk", nameEn:"James K. Polk",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1845–1849", born:"1795, Caroline du Nord", died:"1849",
+    vp:"George M. Dallas",
+    wiki:"James_K._Polk",
+    bioFr:"Polk fut l'un des présidents les plus expansionnistes : il acquit la Californie et le Nouveau-Mexique après la guerre contre le Mexique, et négocia l'Oregon avec la Grande-Bretagne. Il mourut 3 mois après son mandat.",
+    bioEn:"Polk was one of the most expansionist presidents: he acquired California and New Mexico after the Mexican-American War, and negotiated Oregon with Britain. He died 3 months after his term.",
+    eventsFr:["1846 : Guerre contre le Mexique","1846 : Traité sur l'Oregon avec la Grande-Bretagne","1848 : Traité de Guadalupe Hidalgo (Californie, Nouveau-Mexique)"],
+    eventsEn:["1846: Mexican-American War","1846: Oregon Treaty with Britain","1848: Treaty of Guadalupe Hidalgo (California, New Mexico)"]
+  },
+  {
+    num:12, name:"Zachary Taylor", nameEn:"Zachary Taylor",
+    party:"Other", partyFr:"Whig", partyEn:"Whig",
+    mandate:"1849–1850", born:"1784, Virginie", died:"1850",
+    vp:"Millard Fillmore",
+    wiki:"Zachary_Taylor",
+    bioFr:"Héros militaire de la guerre mexicaine, Taylor fut élu sans jamais avoir voté. Il s'opposa à l'extension de l'esclavage. Il mourut d'une gastro-entérite aiguë après 16 mois au pouvoir.",
+    bioEn:"Military hero of the Mexican War, Taylor was elected without ever having voted. He opposed the extension of slavery. He died of acute gastroenteritis after 16 months in office.",
+    eventsFr:["1849 : Ruée vers l'or en Californie","1850 : Mort après 16 mois de mandat","Compromis de 1850 laissé à son successeur"],
+    eventsEn:["1849: California Gold Rush","1850: Dies after 16-month term","Compromise of 1850 left to his successor"]
+  },
+  {
+    num:13, name:"Millard Fillmore", nameEn:"Millard Fillmore",
+    party:"Other", partyFr:"Whig", partyEn:"Whig",
+    mandate:"1850–1853", born:"1800, New York", died:"1874",
+    vp:"Aucun / None",
+    wiki:"Millard_Fillmore",
+    bioFr:"Succédant à Taylor, Fillmore signa le Compromis de 1850 qui équilibra les États esclavagistes et libres. Il envoya le commodore Perry au Japon, ouvrant ce pays au commerce occidental.",
+    bioEn:"Succeeding Taylor, Fillmore signed the Compromise of 1850 balancing slave and free states. He sent Commodore Perry to Japan, opening the country to Western trade.",
+    eventsFr:["1850 : Signe le Compromis de 1850","1853 : Envoi de la flotte Perry au Japon","Dernier président du Parti whig"],
+    eventsEn:["1850: Signs Compromise of 1850","1853: Sends Perry fleet to Japan","Last Whig Party president"]
+  },
+  {
+    num:14, name:"Franklin Pierce", nameEn:"Franklin Pierce",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1853–1857", born:"1804, New Hampshire", died:"1869",
+    vp:"William R. King",
+    wiki:"Franklin_Pierce",
+    bioFr:"Pierce signa le Kansas-Nebraska Act de 1854 qui exacerba les tensions sur l'esclavage et mena au « Kansas Bleeding ». Son mandat contribua à diviser le pays vers la guerre civile.",
+    bioEn:"Pierce signed the Kansas-Nebraska Act of 1854, which exacerbated tensions over slavery and led to 'Bleeding Kansas'. His term helped push the country toward civil war.",
+    eventsFr:["1854 : Kansas-Nebraska Act → tensions esclavagistes","1854–1856 : « Bleeding Kansas »","1854 : Fondation du Parti républicain (en réaction)"],
+    eventsEn:["1854: Kansas-Nebraska Act → slavery tensions","1854–1856: 'Bleeding Kansas'","1854: Republican Party founded (in reaction)"]
+  },
+  {
+    num:15, name:"James Buchanan", nameEn:"James Buchanan",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1857–1861", born:"1791, Pennsylvanie", died:"1868",
+    vp:"John C. Breckinridge",
+    wiki:"James_Buchanan",
+    bioFr:"Seul président célibataire, Buchanan fut incapable d'empêcher la sécession des États du Sud. Il quitta la présidence au moment où le pays sombrait dans la guerre civile.",
+    bioEn:"The only bachelor president, Buchanan was unable to prevent Southern states from seceding. He left the presidency as the country was descending into civil war.",
+    eventsFr:["1857 : Décision Dred Scott (esclavage)","1860 : Élection de Lincoln → sécession","1861 : Fin de mandat avec 7 États sécédés"],
+    eventsEn:["1857: Dred Scott decision (slavery)","1860: Lincoln elected → secession","1861: Leaves office with 7 states seceded"]
+  },
+  {
+    num:16, name:"Abraham Lincoln", nameEn:"Abraham Lincoln",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1861–1865", born:"1809, Kentucky", died:"1865",
+    vp:"Hannibal Hamlin, Andrew Johnson",
+    wiki:"Abraham_Lincoln",
+    bioFr:"Né dans une cabane en rondins, Lincoln devint avocat autodidacte avant d'accéder à la présidence. Il dirigea le pays durant la guerre civile, abolit l'esclavage et préserva l'Union. Assassiné 5 jours après la capitulation confédérée.",
+    bioEn:"Born in a log cabin, Lincoln became a self-taught lawyer before reaching the presidency. He led the country through the Civil War, abolished slavery, and preserved the Union. Assassinated 5 days after Confederate surrender.",
+    eventsFr:["1861–1865 : Guerre civile (Sécession)","1863 : Proclamation d'émancipation (abolition esclavage)","1863 : Discours de Gettysburg","14 avril 1865 : Assassiné au Ford's Theatre"],
+    eventsEn:["1861–1865: Civil War","1863: Emancipation Proclamation (abolishing slavery)","1863: Gettysburg Address","April 14, 1865: Assassinated at Ford's Theatre"]
+  },
+  {
+    num:17, name:"Andrew Johnson", nameEn:"Andrew Johnson",
+    party:"Other", partyFr:"Unioniste / Démocrate", partyEn:"National Union / Democrat",
+    mandate:"1865–1869", born:"1808, Caroline du Nord", died:"1875",
+    vp:"Aucun / None",
+    wiki:"Andrew_Johnson",
+    bioFr:"Successeur de Lincoln, Johnson fut le premier président à être mis en accusation (impeachment) par la Chambre. Il s'opposa aux lois de reconstruction favorables aux anciens esclaves.",
+    bioEn:"Lincoln's successor, Johnson was the first president to be impeached by the House. He opposed Reconstruction laws favorable to former slaves.",
+    eventsFr:["1865 : Reconstruct­ion des États du Sud","1867 : Achat de l'Alaska à la Russie","1868 : Premier impeachment présidentiel (acquitté)"],
+    eventsEn:["1865: Reconstruction of the South","1867: Alaska Purchase from Russia","1868: First presidential impeachment (acquitted)"]
+  },
+  {
+    num:18, name:"Ulysses S. Grant", nameEn:"Ulysses S. Grant",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1869–1877", born:"1822, Ohio", died:"1885",
+    vp:"Schuyler Colfax, Henry Wilson",
+    wiki:"Ulysses_S._Grant",
+    bioFr:"Général nordiste qui gagna la guerre civile, Grant mena la Reconstruction et protégea les droits des Noirs. Son mandat fut terni par des scandales de corruption.",
+    bioEn:"The Union general who won the Civil War, Grant led Reconstruction and protected Black civil rights. His term was marred by corruption scandals.",
+    eventsFr:["1869 : Premier chemin de fer transcontinental","1870 : 15e amendement (droit de vote aux Noirs)","1872 : Scandale Crédit Mobilier"],
+    eventsEn:["1869: First transcontinental railroad","1870: 15th Amendment (Black voting rights)","1872: Crédit Mobilier scandal"]
+  },
+  {
+    num:19, name:"Rutherford B. Hayes", nameEn:"Rutherford B. Hayes",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1877–1881", born:"1822, Ohio", died:"1893",
+    vp:"William A. Wheeler",
+    wiki:"Rutherford_B._Hayes",
+    bioFr:"Hayes fut élu après l'élection la plus disputée de l'histoire (Compromis de 1877). Il mit fin à la Reconstruction en retirant les troupes fédérales du Sud.",
+    bioEn:"Hayes was elected after the most disputed election in history (Compromise of 1877). He ended Reconstruction by withdrawing federal troops from the South.",
+    eventsFr:["1877 : Compromis de 1877 (fin de la Reconstruction)","1877 : Grande grève des chemins de fer","1878 : Premier téléphone à la Maison-Blanche"],
+    eventsEn:["1877: Compromise of 1877 (end of Reconstruction)","1877: Great Railroad Strike","1878: First telephone at the White House"]
+  },
+  {
+    num:20, name:"James A. Garfield", nameEn:"James A. Garfield",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1881", born:"1831, Ohio", died:"1881",
+    vp:"Chester A. Arthur",
+    wiki:"James_A._Garfield",
+    bioFr:"Garfield fut assassiné par un déçu des nominations politiques, seulement 6 mois après son entrée en fonctions. Sa mort lente sur 79 jours conduisit à la réforme du spoils system.",
+    bioEn:"Garfield was assassinated by a disgruntled office-seeker only 6 months into his term. His slow 79-day death led to civil service reform.",
+    eventsFr:["2 juillet 1881 : Blessé par balle","19 septembre 1881 : Décède de ses blessures (79 jours)","1883 : Pendleton Act (réforme de la fonction publique, en réaction)"],
+    eventsEn:["July 2, 1881: Shot by office-seeker","September 19, 1881: Dies from wounds (79 days)","1883: Pendleton Act (civil service reform, in response)"]
+  },
+  {
+    num:21, name:"Chester A. Arthur", nameEn:"Chester A. Arthur",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1881–1885", born:"1829, Vermont", died:"1886",
+    vp:"Aucun / None",
+    wiki:"Chester_A._Arthur",
+    bioFr:"Ancien politicien du spoils system, Arthur surprit tout le monde en signant le Pendleton Act réformant la fonction publique. Il fut un président plus indépendant qu'attendu.",
+    bioEn:"A former spoils system politician, Arthur surprised everyone by signing the Pendleton Act reforming the civil service. He proved a more independent president than expected.",
+    eventsFr:["1883 : Pendleton Civil Service Reform Act","1882 : Chinese Exclusion Act","Modernisation de la marine américaine"],
+    eventsEn:["1883: Pendleton Civil Service Reform Act","1882: Chinese Exclusion Act","Modernization of the US Navy"]
+  },
+  {
+    num:22, name:"Grover Cleveland (1er mandat)", nameEn:"Grover Cleveland (1st term)",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1885–1889", born:"1837, New Jersey", died:"1908",
+    vp:"Thomas A. Hendricks",
+    wiki:"Grover_Cleveland",
+    bioFr:"Premier démocrate élu après la guerre civile, Cleveland était réputé pour son intégrité et son opposition à la corruption. Il fut le seul président à servir deux mandats non consécutifs.",
+    bioEn:"First Democrat elected after the Civil War, Cleveland was known for his integrity and opposition to corruption. He was the only president to serve two non-consecutive terms.",
+    eventsFr:["1886 : Inauguration de la Statue de la Liberté","1887 : Interstate Commerce Act","1888 : Battu par Harrison malgré plus de voix populaires"],
+    eventsEn:["1886: Dedication of the Statue of Liberty","1887: Interstate Commerce Act","1888: Defeated by Harrison despite winning popular vote"]
+  },
+  {
+    num:23, name:"Benjamin Harrison", nameEn:"Benjamin Harrison",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1889–1893", born:"1833, Ohio", died:"1901",
+    vp:"Levi P. Morton",
+    wiki:"Benjamin_Harrison",
+    bioFr:"Petit-fils du président Harrison, il ajouta 6 États à l'Union. Il signa le Sherman Antitrust Act, premier loi fédérale contre les monopoles. Battu par Cleveland en 1892.",
+    bioEn:"Grandson of President Harrison, he added 6 states to the Union. He signed the Sherman Antitrust Act, the first federal anti-monopoly law. Defeated by Cleveland in 1892.",
+    eventsFr:["1889–1890 : 6 nouveaux États admis","1890 : Sherman Antitrust Act","1890 : McKinley Tariff (protectionnisme)"],
+    eventsEn:["1889–1890: 6 new states admitted","1890: Sherman Antitrust Act","1890: McKinley Tariff (protectionism)"]
+  },
+  {
+    num:24, name:"Grover Cleveland (2e mandat)", nameEn:"Grover Cleveland (2nd term)",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1893–1897", born:"1837, New Jersey", died:"1908",
+    vp:"Adlai Stevenson I",
+    wiki:"Grover_Cleveland",
+    bioFr:"Seul président à avoir exercé deux mandats non consécutifs, Cleveland fit face à la grande Panique de 1893. Il s'opposa à l'annexion de Hawaï et refusa d'intervenir lors des grèves.",
+    bioEn:"The only president to serve two non-consecutive terms, Cleveland faced the Panic of 1893. He opposed the annexation of Hawaii and refused to intervene in strikes.",
+    eventsFr:["1893 : Panique économique de 1893","1893–1894 : Grève Pullman","1895 : Litige sur le Venezuela avec la Grande-Bretagne"],
+    eventsEn:["1893: Panic of 1893","1893–1894: Pullman Strike","1895: Venezuela border dispute with Britain"]
+  },
+  {
+    num:25, name:"William McKinley", nameEn:"William McKinley",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1897–1901", born:"1843, Ohio", died:"1901",
+    vp:"Garret Hobart, Theodore Roosevelt",
+    wiki:"William_McKinley",
+    bioFr:"McKinley mena les États-Unis dans la guerre hispano-américaine de 1898, faisant du pays une puissance coloniale (Cuba, Porto Rico, Philippines). Assassiné en 1901 à Buffalo.",
+    bioEn:"McKinley led the United States into the Spanish-American War of 1898, making the country a colonial power (Cuba, Puerto Rico, Philippines). Assassinated in 1901 in Buffalo.",
+    eventsFr:["1898 : Guerre hispano-américaine","1898 : Annexion de Hawaï","6 septembre 1901 : Assassiné à Buffalo"],
+    eventsEn:["1898: Spanish-American War","1898: Annexation of Hawaii","September 6, 1901: Assassinated in Buffalo"]
+  },
+  {
+    num:26, name:"Theodore Roosevelt", nameEn:"Theodore Roosevelt",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1901–1909", born:"1858, New York", died:"1919",
+    vp:"Charles W. Fairbanks",
+    wiki:"Theodore_Roosevelt",
+    bioFr:"Le plus jeune président de l'histoire (42 ans), Roosevelt fut un réformateur énergique. Il démantela les monopoles, protégea 230 millions d'acres de terres, reçut le prix Nobel de la Paix et construisit le canal de Panama.",
+    bioEn:"The youngest president in history (42), Roosevelt was an energetic reformer. He busted monopolies, protected 230 million acres of land, won the Nobel Peace Prize, and built the Panama Canal.",
+    eventsFr:["1903 : Construction du canal de Panama","1906 : Prix Nobel de la Paix (médiation russo-japonaise)","1906 : Pure Food and Drug Act","Conservation de 230 M acres de terres fédérales"],
+    eventsEn:["1903: Panama Canal construction","1906: Nobel Peace Prize (Russo-Japanese mediation)","1906: Pure Food and Drug Act","Conservation of 230M acres of federal land"]
+  },
+  {
+    num:27, name:"William Howard Taft", nameEn:"William Howard Taft",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1909–1913", born:"1857, Ohio", died:"1930",
+    vp:"James S. Sherman",
+    wiki:"William_Howard_Taft",
+    bioFr:"Taft est le seul homme à avoir été à la fois président et Chief Justice de la Cour suprême. Physiquement imposant (environ 136 kg), il poursuivit plus d'antitrusts que Roosevelt.",
+    bioEn:"Taft is the only man to have been both president and Chief Justice of the Supreme Court. Physically imposing (around 300 lbs), he actually prosecuted more antitrusts than Roosevelt.",
+    eventsFr:["1909 : 16e amendement (impôt sur le revenu)","1912 : Roosevelt le défie → Parti progressiste","1913–1921 : Chief Justice de la Cour suprême (après présidence)"],
+    eventsEn:["1909: 16th Amendment (income tax)","1912: Roosevelt challenges him → Progressive Party","1913–1921: Chief Justice of the Supreme Court (after presidency)"]
+  },
+  {
+    num:28, name:"Woodrow Wilson", nameEn:"Woodrow Wilson",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1913–1921", born:"1856, Virginie", died:"1924",
+    vp:"Thomas R. Marshall",
+    wiki:"Woodrow_Wilson",
+    bioFr:"Wilson dirigea les États-Unis pendant la Première Guerre mondiale et proposa les 14 points pour la paix. Prix Nobel de la Paix 1919, il échoua à faire ratifier le Traité de Versailles par le Sénat.",
+    bioEn:"Wilson led the United States through WWI and proposed his 14 Points for peace. Nobel Peace Prize 1919, he failed to get the Senate to ratify the Treaty of Versailles.",
+    eventsFr:["1917 : Entrée en guerre (Première Guerre mondiale)","1918 : 14 points de Wilson pour la paix","1919 : Prix Nobel de la Paix","1920 : Sénat refuse la Société des Nations"],
+    eventsEn:["1917: Enters WWI","1918: Wilson's 14 Points for peace","1919: Nobel Peace Prize","1920: Senate rejects League of Nations"]
+  },
+  {
+    num:29, name:"Warren G. Harding", nameEn:"Warren G. Harding",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1921–1923", born:"1865, Ohio", died:"1923",
+    vp:"Calvin Coolidge",
+    wiki:"Warren_G._Harding",
+    bioFr:"Harding fut élu sur la promesse d'un « retour à la normale » après la guerre. Son mandat fut entaché par le scandale Teapot Dome, l'un des plus grands scandales de corruption de l'histoire présidentielle.",
+    bioEn:"Harding was elected on the promise of a 'return to normalcy' after the war. His term was marred by the Teapot Dome scandal, one of the biggest corruption scandals in presidential history.",
+    eventsFr:["1921 : Conférence de Washington (désarmement naval)","1921–1922 : Scandale Teapot Dome (révélé après mort)","2 août 1923 : Décès brutal à San Francisco"],
+    eventsEn:["1921: Washington Naval Conference (disarmament)","1921–1922: Teapot Dome scandal (revealed after death)","August 2, 1923: Sudden death in San Francisco"]
+  },
+  {
+    num:30, name:"Calvin Coolidge", nameEn:"Calvin Coolidge",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1923–1929", born:"1872, Vermont", died:"1933",
+    vp:"Charles G. Dawes",
+    wiki:"Calvin_Coolidge",
+    bioFr:"Surnommé « Silent Cal » pour sa laconisme légendaire, Coolidge présida les « Années folles » (Roaring Twenties), période de prospérité. Il choisit de ne pas se représenter en 1928.",
+    bioEn:"Nicknamed 'Silent Cal' for his legendary brevity, Coolidge presided over the Roaring Twenties, a period of prosperity. He chose not to seek reelection in 1928.",
+    eventsFr:["1924 : Immigration Act (quotas stricts)","1927 : Charles Lindbergh traverse l'Atlantique","1928 : Pacte Briand-Kellogg (contre la guerre)"],
+    eventsEn:["1924: Immigration Act (strict quotas)","1927: Lindbergh crosses the Atlantic","1928: Kellogg-Briand Pact (against war)"]
+  },
+  {
+    num:31, name:"Herbert Hoover", nameEn:"Herbert Hoover",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1929–1933", born:"1874, Iowa", died:"1964",
+    vp:"Charles Curtis",
+    wiki:"Herbert_Hoover",
+    bioFr:"Ingénieur et humanitaire, Hoover fut frappé de plein fouet par le krach de 1929 et la Grande Dépression. Son refus d'intervenir directement dans l'économie l'opposa à Franklin Roosevelt.",
+    bioEn:"Engineer and humanitarian, Hoover was hit hard by the 1929 crash and the Great Depression. His refusal to directly intervene in the economy set him against Franklin Roosevelt.",
+    eventsFr:["Octobre 1929 : Krach boursier / Grande Dépression","1932 : Manifestations des « Bonus Army »","1932 : Battu par Franklin D. Roosevelt"],
+    eventsEn:["October 1929: Stock market crash / Great Depression","1932: Bonus Army protests","1932: Defeated by Franklin D. Roosevelt"]
+  },
+  {
+    num:32, name:"Franklin D. Roosevelt", nameEn:"Franklin D. Roosevelt",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1933–1945", born:"1882, New York", died:"1945",
+    vp:"John N. Garner, Henry Wallace, Harry S. Truman",
+    wiki:"Franklin_Delano_Roosevelt",
+    bioFr:"Seul président élu quatre fois, FDR sortit le pays de la Grande Dépression avec le New Deal et dirigea les États-Unis pendant la majeure partie de la Seconde Guerre mondiale. Atteint de polio, il gouverna depuis un fauteuil roulant.",
+    bioEn:"The only president elected four times, FDR pulled the country out of the Great Depression with the New Deal and led the United States through most of WWII. Stricken with polio, he governed from a wheelchair.",
+    eventsFr:["1933 : New Deal (relance économique)","1941 : Entrée en guerre après Pearl Harbor","1944 : Débarquement en Normandie","12 avril 1945 : Décès en exercice"],
+    eventsEn:["1933: New Deal (economic recovery)","1941: Enters WWII after Pearl Harbor","1944: D-Day in Normandy","April 12, 1945: Dies in office"]
+  },
+  {
+    num:33, name:"Harry S. Truman", nameEn:"Harry S. Truman",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1945–1953", born:"1884, Missouri", died:"1972",
+    vp:"Alben W. Barkley",
+    wiki:"Harry_S._Truman",
+    bioFr:"Truman prit les décisions les plus lourdes de l'histoire moderne : la bombe atomique sur Hiroshima et Nagasaki, la fondation de l'OTAN, la guerre de Corée. Son inscription « The buck stops here » reste célèbre.",
+    bioEn:"Truman made the heaviest decisions in modern history: the atomic bomb on Hiroshima and Nagasaki, founding NATO, the Korean War. His motto 'The buck stops here' remains famous.",
+    eventsFr:["1945 : Bombes atomiques sur Hiroshima et Nagasaki","1947 : Plan Marshall (reconstruction de l'Europe)","1949 : Création de l'OTAN","1950–1953 : Guerre de Corée"],
+    eventsEn:["1945: Atomic bombs on Hiroshima and Nagasaki","1947: Marshall Plan (European reconstruction)","1949: Creation of NATO","1950–1953: Korean War"]
+  },
+  {
+    num:34, name:"Dwight D. Eisenhower", nameEn:"Dwight D. Eisenhower",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1953–1961", born:"1890, Texas", died:"1969",
+    vp:"Richard Nixon",
+    wiki:"Dwight_D._Eisenhower",
+    bioFr:"Suprême commandant allié en Europe (D-Day), Eisenhower présida la prospérité des années 50. Il créa la NASA, lança l'Interstate Highway System et mit en garde contre le complexe militaro-industriel.",
+    bioEn:"Supreme Allied Commander in Europe (D-Day), Eisenhower presided over 1950s prosperity. He created NASA, launched the Interstate Highway System, and warned against the military-industrial complex.",
+    eventsFr:["1953 : Armistice en Corée","1957 : Crise de Little Rock (dességration scolaire)","1957 : Lancement de Spoutnik → création de la NASA","1961 : Discours d'adieu sur le complexe militaro-industriel"],
+    eventsEn:["1953: Korean War armistice","1957: Little Rock crisis (school desegregation)","1957: Sputnik launch → NASA created","1961: Farewell Address on the military-industrial complex"]
+  },
+  {
+    num:35, name:"John F. Kennedy", nameEn:"John F. Kennedy",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1961–1963", born:"1917, Massachusetts", died:"1963",
+    vp:"Lyndon B. Johnson",
+    wiki:"John_Fitzgerald_Kennedy",
+    bioFr:"Le plus jeune président élu de l'histoire (43 ans), Kennedy incarna le charisme et l'espoir de toute une génération. Il géra la crise des missiles de Cuba et lança le programme Apollo. Assassiné à Dallas.",
+    bioEn:"The youngest elected president in history (43), Kennedy embodied the charisma and hope of a generation. He managed the Cuban Missile Crisis and launched the Apollo program. Assassinated in Dallas.",
+    eventsFr:["1961 : Débarquement de la Baie des Cochons (fiasco)","1962 : Crise des missiles de Cuba","1963 : Discours 'I Have a Dream' de MLK à Washington","22 novembre 1963 : Assassiné à Dallas"],
+    eventsEn:["1961: Bay of Pigs invasion (fiasco)","1962: Cuban Missile Crisis","1963: MLK's 'I Have a Dream' March on Washington","November 22, 1963: Assassinated in Dallas"]
+  },
+  {
+    num:36, name:"Lyndon B. Johnson", nameEn:"Lyndon B. Johnson",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1963–1969", born:"1908, Texas", died:"1973",
+    vp:"Hubert Humphrey",
+    wiki:"Lyndon_B._Johnson",
+    bioFr:"LBJ fit passer les grandes lois sur les droits civiques et créa Medicare et Medicaid. Mais l'escalade au Vietnam le dévora politiquement et il choisit de ne pas se représenter.",
+    bioEn:"LBJ passed landmark civil rights legislation and created Medicare and Medicaid. But the Vietnam War escalation consumed him politically and he chose not to seek reelection.",
+    eventsFr:["1964 : Civil Rights Act (droits civiques)","1965 : Voting Rights Act","1965 : Création de Medicare et Medicaid","1965–1968 : Escalade au Vietnam"],
+    eventsEn:["1964: Civil Rights Act","1965: Voting Rights Act","1965: Medicare and Medicaid created","1965–1968: Vietnam War escalation"]
+  },
+  {
+    num:37, name:"Richard Nixon", nameEn:"Richard Nixon",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1969–1974", born:"1913, Californie", died:"1994",
+    vp:"Spiro Agnew, Gerald Ford",
+    wiki:"Richard_Nixon",
+    bioFr:"Nixon fit la paix au Vietnam et ouvrit les relations avec la Chine. Mais le scandale du Watergate le contraignit à démissionner, unique cas dans l'histoire présidentielle américaine.",
+    bioEn:"Nixon made peace in Vietnam and opened relations with China. But the Watergate scandal forced him to resign, the only such case in American presidential history.",
+    eventsFr:["1969 : Alunissage d'Apollo 11","1972 : Visite historique en Chine","1973 : Accords de paix de Paris (fin du Vietnam)","8 août 1974 : Démission (Watergate)"],
+    eventsEn:["1969: Apollo 11 moon landing","1972: Historic visit to China","1973: Paris Peace Accords (end of Vietnam)","August 8, 1974: Resignation (Watergate)"]
+  },
+  {
+    num:38, name:"Gerald Ford", nameEn:"Gerald Ford",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1974–1977", born:"1913, Nebraska", died:"2006",
+    vp:"Nelson Rockefeller",
+    wiki:"Gerald_Ford",
+    bioFr:"Seul président à ne jamais avoir été élu ni vice-président ni président, Ford accéda au pouvoir après la démission de Nixon. Sa grâce accordée à Nixon lui coûta l'élection de 1976.",
+    bioEn:"The only president never elected as either vice president or president, Ford came to power after Nixon's resignation. His pardon of Nixon cost him the 1976 election.",
+    eventsFr:["1974 : Grâce accordée à Nixon","1975 : Chute de Saïgon (fin de la guerre du Vietnam)","1976 : Battu par Jimmy Carter"],
+    eventsEn:["1974: Pardons Nixon","1975: Fall of Saigon (end of Vietnam War)","1976: Defeated by Jimmy Carter"]
+  },
+  {
+    num:39, name:"Jimmy Carter", nameEn:"Jimmy Carter",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1977–1981", born:"1924, Géorgie", died:"2024",
+    vp:"Walter Mondale",
+    wiki:"Jimmy_Carter",
+    bioFr:"Fermier d'arachides devenu président, Carter négocia les accords de Camp David entre Israël et l'Égypte. La crise des otages en Iran et l'inflation lui coûtèrent sa réélection. Après la présidence, il œuvra pour la paix et reçut le Nobel en 2002.",
+    bioEn:"A peanut farmer turned president, Carter negotiated the Camp David Accords between Israel and Egypt. The Iran hostage crisis and inflation cost him reelection. After the presidency, he worked for peace and won the Nobel Prize in 2002.",
+    eventsFr:["1978 : Accords de Camp David (Israël/Égypte)","1979–1981 : Crise des otages en Iran","1979 : Choc pétrolier et crise énergétique","2002 : Prix Nobel de la Paix"],
+    eventsEn:["1978: Camp David Accords (Israel/Egypt)","1979–1981: Iran Hostage Crisis","1979: Oil shock and energy crisis","2002: Nobel Peace Prize"]
+  },
+  {
+    num:40, name:"Ronald Reagan", nameEn:"Ronald Reagan",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1981–1989", born:"1911, Illinois", died:"2004",
+    vp:"George H.W. Bush",
+    wiki:"Ronald_Reagan",
+    bioFr:"Ancien acteur devenu gouverneur de Californie, Reagan incarna la révolution conservatrice. Il réduisit les impôts (Reaganomics), intensifia la guerre froide contre l'URSS et contribua à sa chute.",
+    bioEn:"Former actor turned California governor, Reagan embodied the conservative revolution. He cut taxes (Reaganomics), intensified the Cold War against the USSR, and contributed to its fall.",
+    eventsFr:["1981 : Tentative d'assassinat (survécut)","1981 : Reaganomics (réductions d'impôts massives)","1987 : Traité INF sur les missiles avec Gorbatchev","1989 : Chute du mur de Berlin (après son mandat)"],
+    eventsEn:["1981: Assassination attempt (survived)","1981: Reaganomics (massive tax cuts)","1987: INF Treaty on missiles with Gorbachev","1989: Fall of Berlin Wall (after his term)"]
+  },
+  {
+    num:41, name:"George H.W. Bush", nameEn:"George H.W. Bush",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"1989–1993", born:"1924, Massachusetts", died:"2018",
+    vp:"Dan Quayle",
+    wiki:"George_H._W._Bush",
+    bioFr:"Ancien directeur de la CIA et vice-président, Bush géra la fin de la Guerre froide et mena la coalition internationale contre l'Irak lors de la guerre du Golfe. Battu par Clinton sur les questions économiques.",
+    bioEn:"Former CIA director and vice president, Bush managed the end of the Cold War and led the international coalition against Iraq in the Gulf War. Defeated by Clinton on economic issues.",
+    eventsFr:["1989 : Chute du mur de Berlin","1991 : Guerre du Golfe (libération du Koweït)","1991 : Dissolution de l'URSS","1992 : Battu par Bill Clinton"],
+    eventsEn:["1989: Fall of Berlin Wall","1991: Gulf War (liberation of Kuwait)","1991: Dissolution of the USSR","1992: Defeated by Bill Clinton"]
+  },
+  {
+    num:42, name:"Bill Clinton", nameEn:"Bill Clinton",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"1993–2001", born:"1946, Arkansas", died:null,
+    vp:"Al Gore",
+    wiki:"Bill_Clinton",
+    bioFr:"Clinton présida la plus longue période de croissance économique en temps de paix. Il signa le NAFTA et équilibra le budget fédéral. Son mandat fut entaché par le scandale Monica Lewinsky et son impeachment par la Chambre.",
+    bioEn:"Clinton presided over the longest peacetime economic expansion. He signed NAFTA and balanced the federal budget. His term was marred by the Monica Lewinsky scandal and his impeachment by the House.",
+    eventsFr:["1993 : NAFTA (accord de libre-échange)","1998 : Surplus budgétaire fédéral","1998 : Impeachment (scandale Lewinsky) — acquitté au Sénat","1999 : Bombardements de l'OTAN en Yougoslavie"],
+    eventsEn:["1993: NAFTA (free trade agreement)","1998: Federal budget surplus","1998: Impeached (Lewinsky scandal) — acquitted by Senate","1999: NATO bombing of Yugoslavia"]
+  },
+  {
+    num:43, name:"George W. Bush", nameEn:"George W. Bush",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"2001–2009", born:"1946, Connecticut", died:null,
+    vp:"Dick Cheney",
+    wiki:"George_W._Bush",
+    bioFr:"Élu dans la controverse (Floride 2000), Bush dirigea le pays après les attentats du 11 septembre 2001 et lança les guerres en Afghanistan et en Irak. La crise financière de 2008 marqua la fin de son mandat.",
+    bioEn:"Elected controversially (Florida 2000), Bush led the country after the September 11, 2001 attacks and launched wars in Afghanistan and Iraq. The 2008 financial crisis marked the end of his term.",
+    eventsFr:["11 septembre 2001 : Attentats (3 000 morts)","2001 : Guerre en Afghanistan","2003 : Guerre en Irak","2008 : Crise financière mondiale"],
+    eventsEn:["September 11, 2001: Terror attacks (3,000 dead)","2001: War in Afghanistan","2003: Iraq War","2008: Global financial crisis"]
+  },
+  {
+    num:44, name:"Barack Obama", nameEn:"Barack Obama",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"2009–2017", born:"1961, Hawaï", died:null,
+    vp:"Joe Biden",
+    wiki:"Barack_Obama",
+    bioFr:"Premier président afro-américain de l'histoire, Obama reçut le prix Nobel de la Paix dès sa première année. Il fit adopter la réforme de santé (ACA/Obamacare) et ordonna l'élimination d'Oussama Ben Laden.",
+    bioEn:"First African-American president in history, Obama received the Nobel Peace Prize in his first year. He passed healthcare reform (ACA/Obamacare) and ordered the elimination of Osama bin Laden.",
+    eventsFr:["2009 : Prix Nobel de la Paix","2010 : Affordable Care Act (Obamacare)","2011 : Élimination d'Oussama Ben Laden","2015 : Accord de Paris sur le climat"],
+    eventsEn:["2009: Nobel Peace Prize","2010: Affordable Care Act (Obamacare)","2011: Elimination of Osama bin Laden","2015: Paris Climate Agreement"]
+  },
+  {
+    num:45, name:"Donald Trump (1er mandat)", nameEn:"Donald Trump (1st term)",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"2017–2021", born:"1946, New York", died:null,
+    vp:"Mike Pence",
+    wiki:"Donald_Trump",
+    bioFr:"Homme d'affaires et star de télé-réalité, Trump fut élu sur un programme nationaliste (« America First »). Controversé pour ses politiques migratoires et commerciales, il fut impeaché deux fois par la Chambre mais acquitté par le Sénat.",
+    bioEn:"Businessman and reality TV star, Trump was elected on a nationalist platform ('America First'). Controversial for his immigration and trade policies, he was impeached twice by the House but acquitted by the Senate.",
+    eventsFr:["2017 : Réduction des impôts (Tax Cuts and Jobs Act)","2019 : 1er impeachment (Ukraine) — acquitté","2020 : COVID-19 (gestion controversée)","2021 : 2e impeachment (6 janvier) — acquitté"],
+    eventsEn:["2017: Tax Cuts and Jobs Act","2019: 1st impeachment (Ukraine) — acquitted","2020: COVID-19 (controversial handling)","2021: 2nd impeachment (January 6) — acquitted"]
+  },
+  {
+    num:46, name:"Joe Biden", nameEn:"Joe Biden",
+    party:"Democratic", partyFr:"Démocrate", partyEn:"Democrat",
+    mandate:"2021–2025", born:"1942, Pennsylvanie", died:null,
+    vp:"Kamala Harris",
+    wiki:"Joe_Biden",
+    bioFr:"Doyen des présidents américains à son élection (78 ans), Biden battit Trump sur fond de pandémie. Il fit adopter des plans massifs d'infrastructure et de lutte contre le changement climatique, avant de ne pas se représenter en 2024.",
+    bioEn:"The oldest person elected US president (78), Biden defeated Trump amid the pandemic. He passed massive infrastructure and climate change plans, before declining to run again in 2024.",
+    eventsFr:["2021 : Plan de relance COVID (1 900 Mds $)","2021 : Retrait d'Afghanistan","2022 : Infrastructure Investment and Jobs Act","2022 : Soutien à l'Ukraine face à la Russie"],
+    eventsEn:["2021: COVID relief plan ($1.9 trillion)","2021: Withdrawal from Afghanistan","2022: Infrastructure Investment and Jobs Act","2022: Support for Ukraine against Russia"]
+  },
+  {
+    num:47, name:"Donald Trump (2e mandat)", nameEn:"Donald Trump (2nd term)",
+    party:"Republican", partyFr:"Républicain", partyEn:"Republican",
+    mandate:"2025–", born:"1946, New York", died:null,
+    vp:"JD Vance",
+    wiki:"Donald_Trump",
+    bioFr:"Trump revient au pouvoir après sa victoire de novembre 2024, devenant le second président à exercer deux mandats non consécutifs (après Grover Cleveland). Son second mandat est marqué par des politiques de tarifs douaniers massifs et une redéfinition de la politique étrangère américaine.",
+    bioEn:"Trump returns to power after his November 2024 victory, becoming the second president to serve two non-consecutive terms (after Grover Cleveland). His second term is marked by sweeping tariff policies and a redefinition of American foreign policy.",
+    eventsFr:["Janvier 2025 : Retour à la Maison-Blanche","2025 : Tarifs douaniers massifs sur les importations","2025 : Retrait de l'Accord de Paris et de l'OMS","2025 : Politique migratoire très restrictive"],
+    eventsEn:["January 2025: Returns to the White House","2025: Sweeping import tariffs","2025: Withdrawal from Paris Accord and WHO","2025: Highly restrictive immigration policy"]
+  }
+];
+
+// ═══════════════════════════════════════
+//  ÉTAT
+// ═══════════════════════════════════════
+let lang = 'fr';
+let activeFilter = 'all';
+let quizData = [];
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+// ═══════════════════════════════════════
+//  LANGUE
+// ═══════════════════════════════════════
+const T = {
+  fr: {
+    title: "Présidents Américains",
+    subtitle: "47 présidents · 1789 – 2025",
+    search: "Rechercher…",
+    count: n => `${n} président${n>1?'s':''}`,
+    mandate: "Mandat",
+    born: "Naissance", died: "Décès", vp: "Vice-Président",
+    bio: "Biographie", events: "Événements clés", infos: "Informations",
+    settings: "⚙️ Réglages", langLbl: "Langue", langVal: "Français",
+    total: "Total présidents", also: "Autres applications",
+    tabList: "Liste", tabQuiz: "Quiz",
+    quizTitle: "🎯 Quiz",
+    quizQ: (name) => `Quel est le numéro de mandat de ${name} ?`,
+    quizQ2: (num) => `Quel est le ${num}e président des États-Unis ?`,
+    quizQ3: (name) => `Quel parti représentait ${name} ?`,
+    score: s => `Score : ${s}`,
+    progress: (i,t) => `Question ${i}/${t}`,
+    next: "Question suivante →",
+    endLabel: "/ 10",
+    restart: "Recommencer",
+    alive: "En vie",
+  },
+  en: {
+    title: "American Presidents",
+    subtitle: "47 presidents · 1789 – 2025",
+    search: "Search…",
+    count: n => `${n} president${n>1?'s':''}`,
+    mandate: "Term", born: "Birth", died: "Death", vp: "Vice President",
+    bio: "Biography", events: "Key events", infos: "Information",
+    settings: "⚙️ Settings", langLbl: "Language", langVal: "English",
+    total: "Total presidents", also: "Other apps",
+    tabList: "List", tabQuiz: "Quiz",
+    quizTitle: "🎯 Quiz",
+    quizQ: (name) => `What is the term number of ${name}?`,
+    quizQ2: (num) => `Who was the ${num}${['st','nd','rd'][num-1]||'th'} US president?`,
+    quizQ3: (name) => `Which party did ${name} represent?`,
+    score: s => `Score: ${s}`,
+    progress: (i,t) => `Question ${i}/${t}`,
+    next: "Next question →",
+    endLabel: "/ 10",
+    restart: "Play again",
+    alive: "Still alive",
+  }
+};
+
+function t(key, ...args) {
+  const fn = T[lang][key];
+  if (typeof fn === 'function') return fn(...args);
+  return fn || '';
+}
+
+// ═══════════════════════════════════════
+//  RENDU LISTE
+// ═══════════════════════════════════════
+function applyFilters() {
+  const query = document.getElementById('search').value.toLowerCase().trim();
+  let filtered = PRESIDENTS.filter(p => {
+    const name = lang === 'fr' ? p.name : p.nameEn;
+    const matchSearch = !query || name.toLowerCase().includes(query) ||
+      p.mandate.includes(query) ||
+      (lang === 'fr' ? p.partyFr : p.partyEn).toLowerCase().includes(query);
+    let matchFilter = true;
+    if (activeFilter === 'Republican') matchFilter = p.party === 'Republican';
+    else if (activeFilter === 'Democratic') matchFilter = p.party === 'Democratic';
+    else if (activeFilter === 'Other') matchFilter = p.party === 'Other';
+    else if (activeFilter === '18') matchFilter = parseInt(p.mandate) < 1800;
+    else if (activeFilter === '19') matchFilter = parseInt(p.mandate) >= 1800 && parseInt(p.mandate) < 1900;
+    else if (activeFilter === '20') matchFilter = parseInt(p.mandate) >= 1900 && parseInt(p.mandate) < 2000;
+    else if (activeFilter === '21') matchFilter = parseInt(p.mandate) >= 2000;
+    return matchSearch && matchFilter;
+  });
+
+  const scroll = document.getElementById('scroll');
+  scroll.innerHTML = '';
+  document.getElementById('count').textContent = t('count', filtered.length);
+
+  filtered.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'president-card';
+    card.onclick = () => openModal(p);
+
+    const partyClass = p.party === 'Republican' ? 'party-rep' :
+                       p.party === 'Democratic' ? 'party-dem' : 'party-other';
+    const partyLabel = lang === 'fr' ? p.partyFr : p.partyEn;
+    const name = lang === 'fr' ? p.name : p.nameEn;
+
+    card.innerHTML = `
+      <div class="card-num">${p.num}</div>
+      <div class="card-portrait-placeholder" id="ph-${p.num}">🇺🇸</div>
+      <img class="card-portrait" id="img-${p.num}" style="display:none" alt="${name}">
+      <div class="card-info">
+        <div class="card-name">${name}</div>
+        <div class="card-dates">${p.mandate}</div>
+        <div class="card-party ${partyClass}">${partyLabel}</div>
+      </div>
+      <div class="card-arrow">›</div>
+    `;
+    scroll.appendChild(card);
+
+    // Charger portrait Wikipedia
+    loadPortrait(p.wiki, `img-${p.num}`, `ph-${p.num}`);
+  });
+}
+
+function loadPortrait(wikiTitle, imgId, phId) {
+  if (!wikiTitle) return;
+  const url = `https://fr.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(wikiTitle)}&prop=pageimages&format=json&pithumbsize=120&origin=*`;
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      const pages = data.query.pages;
+      const page = Object.values(pages)[0];
+      if (page && page.thumbnail) {
+        const img = document.getElementById(imgId);
+        const ph = document.getElementById(phId);
+        if (img) {
+          img.src = page.thumbnail.source;
+          img.onload = () => { img.style.display='block'; if(ph) ph.style.display='none'; };
+        }
+      }
+    })
+    .catch(() => {});
+}
+
+// ═══════════════════════════════════════
+//  MODAL DÉTAIL
+// ═══════════════════════════════════════
+function openModal(p) {
+  const name = lang === 'fr' ? p.name : p.nameEn;
+  const nameSub = lang === 'fr' ? p.nameEn : p.name;
+  const party = lang === 'fr' ? p.partyFr : p.partyEn;
+  const bio = lang === 'fr' ? p.bioFr : p.bioEn;
+  const events = lang === 'fr' ? p.eventsFr : p.eventsEn;
+  const died = p.died ? p.died : t('alive');
+
+  document.getElementById('modal-num').textContent = `#${p.num}`;
+  document.getElementById('modal-name').textContent = name;
+  document.getElementById('modal-name-sub').textContent = nameSub !== name ? nameSub : '';
+  document.getElementById('modal-dates').textContent = p.mandate;
+  document.getElementById('modal-born').textContent = p.born;
+  document.getElementById('modal-died').textContent = died;
+  document.getElementById('modal-vp').textContent = p.vp;
+  document.getElementById('modal-mandate').textContent = p.mandate;
+  document.getElementById('modal-bio').textContent = bio;
+
+  const badge = document.getElementById('modal-party-badge');
+  badge.textContent = party;
+  badge.className = 'modal-party-badge ' +
+    (p.party === 'Republican' ? 'badge-rep' : p.party === 'Democratic' ? 'badge-dem' : 'badge-other');
+
+  const evList = document.getElementById('modal-events');
+  evList.innerHTML = events.map(e => `<li>${e}</li>`).join('');
+
+  // Labels
+  document.getElementById('lbl-infos').textContent = t('infos');
+  document.getElementById('lbl-born').textContent = t('born');
+  document.getElementById('lbl-died').textContent = t('died');
+  document.getElementById('lbl-vp').textContent = t('vp');
+  document.getElementById('lbl-mandate').textContent = t('mandate');
+  document.getElementById('lbl-bio').textContent = t('bio');
+  document.getElementById('lbl-events').textContent = t('events');
+
+  // Portrait
+  const modalPortrait = document.getElementById('modal-portrait');
+  const modalPh = document.getElementById('modal-portrait-placeholder');
+  modalPortrait.style.display = 'none';
+  modalPh.style.display = 'flex';
+
+  if (p.wiki) {
+    const url = `https://fr.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(p.wiki)}&prop=pageimages&format=json&pithumbsize=200&origin=*`;
+    fetch(url).then(r=>r.json()).then(data => {
+      const page = Object.values(data.query.pages)[0];
+      if (page && page.thumbnail) {
+        modalPortrait.src = page.thumbnail.source;
+        modalPortrait.onload = () => { modalPortrait.style.display='block'; modalPh.style.display='none'; };
+      }
+    }).catch(()=>{});
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ═══════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════
+function openSettings() {
+  document.getElementById('settings-overlay').classList.add('open');
+}
+function closeSettings(e) {
+  if (e.target === document.getElementById('settings-overlay')) {
+    document.getElementById('settings-overlay').classList.remove('open');
+  }
+}
+function openUrl(url) {
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+    window.Capacitor.Plugins.Browser.open({ url });
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+// ═══════════════════════════════════════
+//  LANGUE TOGGLE
+// ═══════════════════════════════════════
+function toggleLang() {
+  lang = lang === 'fr' ? 'en' : 'fr';
+  updateLangUI();
+  applyFilters();
+}
+
+function updateLangUI() {
+  document.getElementById('lang-btn').textContent = lang === 'fr' ? 'EN' : 'FR';
+  document.getElementById('main-title').textContent = t('title');
+  document.getElementById('subtitle').textContent = t('subtitle');
+  document.getElementById('search').placeholder = t('search');
+  document.getElementById('settings-title').textContent = t('settings');
+  document.getElementById('lbl-lang').textContent = t('langLbl');
+  document.getElementById('settings-lang-val').textContent = t('langVal');
+  document.getElementById('lbl-total').textContent = t('total');
+  document.getElementById('lbl-also').textContent = t('also');
+  document.getElementById('tab-list-lbl').textContent = t('tabList');
+  document.getElementById('tab-quiz-lbl').textContent = t('tabQuiz');
+  document.getElementById('tab-apps-lbl').textContent = lang === 'fr' ? 'Mes Apps' : 'My Apps';
+  // Re-render apps si onglet actif
+  if (document.getElementById('panel-apps').classList.contains('active')) renderApps();
+
+  // Filtres
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.textContent = btn.dataset[lang === 'fr' ? 'fr' : 'en'];
+  });
+}
+
+// ═══════════════════════════════════════
+//  FILTRES
+// ═══════════════════════════════════════
+function setFilter(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+// ═══════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+
+  const isList = tab === 'list';
+  const isApps = tab === 'apps';
+
+  // Éléments spécifiques à l'onglet liste
+  document.getElementById('search-wrap').style.display = isList ? 'block' : 'none';
+  document.getElementById('filters').style.display     = isList ? 'flex'  : 'none';
+  document.getElementById('count').style.display       = isList ? 'block' : 'none';
+
+  // Les deux panels scrollables s'excluent mutuellement
+  document.getElementById('scroll').style.flex    = isList ? '1' : '0';
+  document.getElementById('scroll').style.display = isList ? 'block' : 'none';
+  document.getElementById('panel-apps').classList.toggle('active', isApps);
+
+  if (tab === 'quiz') {
+    document.getElementById('quiz-overlay').classList.add('open');
+    startQuiz();
+  }
+  if (isApps) {
+    renderApps();
+  }
+}
+
+// ═══════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════
+function closeQuiz() {
+  document.getElementById('quiz-overlay').classList.remove('open');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-list').classList.add('active');
+  document.getElementById('scroll').style.flex    = '1';
+  document.getElementById('scroll').style.display = 'block';
+  document.getElementById('search-wrap').style.display = 'block';
+  document.getElementById('filters').style.display     = 'flex';
+  document.getElementById('count').style.display       = 'block';
+  document.getElementById('panel-apps').classList.remove('active');
+}
+
+function startQuiz() {
+  quizScore = 0;
+  quizIndex = 0;
+  quizAnswered = false;
+  // Mélanger et prendre 10
+  quizData = [...PRESIDENTS].sort(() => Math.random() - 0.5).slice(0, 10);
+  document.getElementById('quiz-end').style.display = 'none';
+  document.getElementById('quiz-options').style.display = 'block';
+  document.getElementById('quiz-question').style.display = 'block';
+  document.getElementById('quiz-portrait-wrap').style.display = 'block';
+  document.getElementById('quiz-next').style.display = 'none';
+  showQuizQuestion();
+}
+
+function showQuizQuestion() {
+  if (quizIndex >= quizData.length) {
+    showQuizEnd();
+    return;
+  }
+  const p = quizData[quizIndex];
+  quizAnswered = false;
+  document.getElementById('quiz-title').textContent = t('quizTitle');
+  document.getElementById('quiz-score-txt').textContent = t('score', quizScore);
+  document.getElementById('quiz-progress-txt').textContent = t('progress', quizIndex + 1, quizData.length);
+  document.getElementById('quiz-next').style.display = 'none';
+
+  // Type de question : 0=numéro, 1=nom, 2=parti
+  const qType = Math.floor(Math.random() * 3);
+  let question, correct, options;
+  const name = lang === 'fr' ? p.name : p.nameEn;
+
+  if (qType === 0) {
+    question = t('quizQ', name);
+    correct = String(p.num);
+    const nums = [p.num];
+    while (nums.length < 4) {
+      const n = Math.floor(Math.random() * 47) + 1;
+      if (!nums.includes(n)) nums.push(n);
+    }
+    options = nums.sort(() => Math.random() - 0.5).map(n => ({ label: `#${n}`, value: String(n) }));
+  } else if (qType === 1) {
+    question = t('quizQ2', p.num);
+    correct = name;
+    const others = PRESIDENTS.filter(x => x.num !== p.num).sort(() => Math.random() - 0.5).slice(0, 3);
+    const opts = [p, ...others].sort(() => Math.random() - 0.5);
+    options = opts.map(x => ({ label: lang === 'fr' ? x.name : x.nameEn, value: lang === 'fr' ? x.name : x.nameEn }));
+  } else {
+    question = t('quizQ3', name);
+    correct = lang === 'fr' ? p.partyFr : p.partyEn;
+    const allParties = [...new Set(PRESIDENTS.map(x => lang === 'fr' ? x.partyFr : x.partyEn))];
+    const others = allParties.filter(x => x !== correct).sort(() => Math.random() - 0.5).slice(0, 3);
+    options = [correct, ...others].sort(() => Math.random() - 0.5).map(v => ({ label: v, value: v }));
+  }
+
+  // Portrait
+  const wrap = document.getElementById('quiz-portrait-wrap');
+  wrap.innerHTML = '';
+  if (p.wiki) {
+    const ph = document.createElement('div');
+    ph.id = 'quiz-portrait-ph';
+    ph.className = '';
+    ph.style.cssText = 'display:inline-flex;width:90px;height:90px;border-radius:50%;background:var(--card);border:3px solid var(--gold);align-items:center;justify-content:center;font-size:38px;';
+    ph.textContent = '🇺🇸';
+    wrap.appendChild(ph);
+
+    fetch(`https://fr.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(p.wiki)}&prop=pageimages&format=json&pithumbsize=180&origin=*`)
+      .then(r=>r.json()).then(data => {
+        const page = Object.values(data.query.pages)[0];
+        if (page && page.thumbnail) {
+          const img = document.createElement('img');
+          img.src = page.thumbnail.source;
+          img.style.cssText = 'width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);';
+          img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
+        }
+      }).catch(()=>{});
+  }
+
+  document.getElementById('quiz-question').textContent = question;
+
+  const optsDiv = document.getElementById('quiz-options');
+  optsDiv.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt.label;
+    btn.onclick = () => answerQuiz(btn, opt.value, correct, options.find(o => o.value === correct)?.label || correct);
+    optsDiv.appendChild(btn);
+  });
+}
+
+function answerQuiz(btn, value, correct, correctLabel) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(b => {
+    if (b.textContent === correctLabel) b.classList.add('correct');
+  });
+  if (value === correct) {
+    btn.classList.add('correct');
+    quizScore++;
+  } else {
+    btn.classList.add('wrong');
+  }
+  document.getElementById('quiz-score-txt').textContent = t('score', quizScore);
+  const nextBtn = document.getElementById('quiz-next');
+  nextBtn.textContent = quizIndex < quizData.length - 1 ? t('next') : (lang === 'fr' ? 'Voir le résultat →' : 'See result →');
+  nextBtn.style.display = 'block';
+}
+
+function nextQuestion() {
+  quizIndex++;
+  showQuizQuestion();
+}
+
+function showQuizEnd() {
+  document.getElementById('quiz-options').style.display = 'none';
+  document.getElementById('quiz-question').style.display = 'none';
+  document.getElementById('quiz-portrait-wrap').style.display = 'none';
+  document.getElementById('quiz-next').style.display = 'none';
+  const endDiv = document.getElementById('quiz-end');
+  endDiv.style.display = 'block';
+  document.getElementById('quiz-end-score').textContent = `${quizScore}${t('endLabel')}`;
+  const pct = quizScore / quizData.length;
+  const emoji = pct >= 0.8 ? '🏆' : pct >= 0.5 ? '👍' : '📚';
+  document.getElementById('quiz-end-label').textContent = emoji + ' ' + (
+    lang === 'fr'
+      ? (pct >= 0.8 ? 'Excellent !' : pct >= 0.5 ? 'Pas mal !' : 'À revoir !')
+      : (pct >= 0.8 ? 'Excellent!' : pct >= 0.5 ? 'Not bad!' : 'Keep studying!')
+  );
+  document.getElementById('quiz-restart').textContent = t('restart');
+}
+
+// ═══════════════════════════════════════
+//  MES APPS
+// ═══════════════════════════════════════
+const MGA_APPS = [
+  { emoji:'👑', fr:'Rois de France',                  en:'Kings of France',                  desc_fr:'44 souverains par dynastie',              desc_en:'44 sovereigns by dynasty',              id:'id6761323546' },
+  { emoji:'🇫🇷', fr:'Présidents Français',             en:'French Presidents',                desc_fr:'Les présidents de la République',         desc_en:'Presidents of the French Republic',     id:'id6761424444' },
+  { emoji:'🏛️', fr:'Institut de France',              en:'Institut de France',               desc_fr:'Les 5 académies françaises',              desc_en:'The 5 French academies',                id:'id6761769529' },
+  { emoji:'📜', fr:'Académie française',              en:'Académie française',               desc_fr:'Les 40 Immortels',                        desc_en:'The 40 Immortals',                       id:'id6761334922' },
+  { emoji:'⚔️', fr:'Maréchaux Napoléon',             en:'Marshals of Napoleon',             desc_fr:"Les 26 maréchaux d'Empire",              desc_en:'The 26 Marshals of the Empire',          id:'id6761374601' },
+  { emoji:'🕌', fr:'Panthéon Paris',                  en:'Panthéon Paris',                   desc_fr:'Les grands personnages inhumés',          desc_en:'Great figures buried there',             id:'id6761335268' },
+  { emoji:'🏰', fr:'Basilique de Saint-Denis',        en:'Basilica of Saint-Denis',          desc_fr:'Nécropole royale de France',              desc_en:'Royal necropolis of France',             id:'id6761709149' },
+  { emoji:'🏛️', fr:'Sénat Paris',                    en:'Sénat Paris',                      desc_fr:'Présidents du Sénat français',           desc_en:'Presidents of the French Senate',       id:'id6761363063' },
+  { emoji:'🗳️', fr:'Assemblée Paris',                en:'Assemblée Paris',                  desc_fr:"Présidents de l'Assemblée nationale",    desc_en:'Presidents of the National Assembly',   id:'id6761361079' },
+  { emoji:'🎭', fr:'Théâtres Paris',                  en:'Théâtres Paris',                   desc_fr:'39 théâtres parisiens',                  desc_en:'39 Parisian theaters',                   id:'id6760929391' },
+  { emoji:'🎬', fr:'Scènes Paris',                    en:'Scènes Paris',                     desc_fr:'Salles de spectacle parisiennes',         desc_en:'Parisian performance venues',            id:'id6761293938' },
+  { emoji:'🖼️', fr:'Musées Paris',                   en:'Musées Paris',                     desc_fr:'37 musées parisiens',                    desc_en:'37 Parisian museums',                    id:'id6760890465' },
+  { emoji:'🌿', fr:'Cimetières Paris',                en:'Cimetières Paris',                 desc_fr:'Père-Lachaise & Montparnasse',           desc_en:'Père-Lachaise & Montparnasse',           id:'id6760751055' },
+  { emoji:'🍽️', fr:'MesRestaurants',                 en:'MesRestaurants',                   desc_fr:'Votre carnet de restaurants',            desc_en:'Your restaurant notebook',               id:'id6760617965' },
+  { emoji:'🧊', fr:'Frigo Manager',                   en:'Frigo Manager',                    desc_fr:'Anti-gaspillage alimentaire',            desc_en:'Food waste prevention',                  id:'id6759219383' },
+  { emoji:'🍷', fr:'Cave Manager',                    en:'Cave Manager',                     desc_fr:'Gérez votre cave à vin',                 desc_en:'Manage your wine cellar',                id:'id6760126279' },
+  { emoji:'💊', fr:'MediSafe-Pharmacie',              en:'MediSafe-Pharmacy',                desc_fr:'Gestion de vos médicaments',             desc_en:'Manage your medications',                id:'id6761271324' },
+  { emoji:'🃏', fr:'Belote Calc',                     en:'Belote Calc',                      desc_fr:'Calculateur de score belote',            desc_en:'Belote score calculator',                id:'id1483084001' },
+  { emoji:'🃏', fr:'Tarot Calc',                      en:'Tarot Calc',                       desc_fr:'Calculateur de score tarot',             desc_en:'Tarot score calculator',                 id:'id1481989301' },
+];
+
+function renderApps() {
+  const panel = document.getElementById('panel-apps');
+  const lbl = lang === 'fr' ? 'Autres applications de Michel Garlandat' : 'Other apps by Michel Garlandat';
+  let html = `<div class="apps-header-lbl">${lbl}</div>`;
+  MGA_APPS.forEach(app => {
+    const name = lang === 'fr' ? app.fr : app.en;
+    const desc = lang === 'fr' ? app.desc_fr : app.desc_en;
+    html += `
+      <div class="app-row" onclick="openUrl('https://apps.apple.com/app/${app.id}')">
+        <div class="app-row-icon">${app.emoji}</div>
+        <div class="app-row-info">
+          <div class="app-row-name">${name}</div>
+          <div class="app-row-desc">${desc}</div>
+        </div>
+        <div class="app-row-arrow">›</div>
+      </div>`;
+  });
+  panel.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  updateLangUI();
+  applyFilters();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "appId": "com.michel.garlandat.presidentsamericains",
+  "appName": "Présidents Américains",
+  "webDir": "App/public",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#0a0e1a",
+  "ios": {
+    "backgroundColor": "#0a0e1a",
+    "contentInset": "automatic",
+    "scrollEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    },
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}
